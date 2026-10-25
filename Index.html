@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>たし算チャレンジ</title>
+<style>
+:root{--ink:#24324a;--blue:#4f7df3;--mint:#dff7eb;--yellow:#fff0a8;--pink:#ffe3e8;--paper:#f5f8ff}
+*{box-sizing:border-box} body{margin:0;background:linear-gradient(145deg,#eaf3ff,#fff8e9);font-family:system-ui,-apple-system,"Hiragino Kaku Gothic ProN",Meiryo,sans-serif;color:var(--ink);min-height:100svh}
+button{font:inherit;cursor:pointer;touch-action:manipulation;border:0}
+.app{width:min(900px,100%);min-height:100svh;margin:auto;padding:clamp(12px,3vw,28px);display:flex;flex-direction:column}
+header{text-align:center;padding:4px 0 14px}h1{font-size:clamp(1.7rem,5vw,2.6rem);margin:0;color:#355fc5}header p{margin:6px 0;color:#61708a}
+.panel{background:#fff;border-radius:26px;padding:clamp(16px,3vw,28px);box-shadow:0 8px 24px #45618b18}
+.level-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.level{background:#f3f6ff;border:3px solid transparent;border-radius:18px;padding:16px 12px;text-align:left;min-height:100px;color:var(--ink);transition:.15s}
+.level:active{transform:scale(.98)}.level .num{display:inline-grid;place-items:center;background:#dce7ff;color:#315bc1;width:34px;height:34px;border-radius:12px;font-weight:900;margin-right:8px}.level strong{font-size:1.05rem}.level small{display:block;margin:9px 0 0 42px;color:#63718a;font-size:.9rem}
+.primary{display:block;width:100%;margin-top:18px;border-radius:18px;padding:16px;background:var(--blue);color:white;font-weight:900;font-size:1.15rem;box-shadow:0 5px 0 #315bc1}.primary:active{transform:translateY(2px);box-shadow:0 3px 0 #315bc1}
+.hidden{display:none!important}.topline{display:flex;justify-content:space-between;gap:10px;align-items:center;font-weight:800;color:#60708b;margin-bottom:12px}.pill{background:#eef3ff;border-radius:99px;padding:8px 13px;white-space:nowrap}
+.progress{height:10px;background:#edf0f7;border-radius:99px;overflow:hidden;margin:8px 0 22px}.bar{height:100%;width:0;background:#6acba2;transition:width .2s}
+.question{text-align:center;padding:clamp(12px,3vh,30px) 0 18px}.question .label{font-weight:800;color:#7b8aa3;font-size:1rem}.equation{font-size:clamp(2.7rem,9vw,5rem);font-weight:900;letter-spacing:1px;line-height:1.2;margin:8px 0 18px;color:#2f4262;display:flex;align-items:center;justify-content:center;gap:clamp(5px,1.5vw,14px);flex-wrap:nowrap}.equation .eq-text{white-space:nowrap}.equation .answer-slots{display:inline-flex;gap:6px;margin:0;flex-shrink:0}.equation .slot-wrap{display:flex;flex-direction:column;align-items:center}.equation .slot{width:clamp(42px,10vw,68px);height:clamp(48px,12vw,72px);font-size:clamp(1.8rem,6vw,2.7rem);border-radius:12px}.equation .slot-label{font-size:.65rem;white-space:nowrap}.answer-slots{display:flex;justify-content:center;gap:12px;margin:0 auto 12px}.answer-slots.in-equation{display:inline-flex;vertical-align:middle}.question > .answer-slots:not(.in-equation){display:none}.slot{width:76px;height:82px;border:3px solid #d9e1f2;border-radius:18px;display:grid;place-items:center;font-size:2.8rem;font-weight:900;background:#f9fbff}.slot.active{border-color:var(--blue);background:#edf2ff;box-shadow:0 0 0 4px #4f7df322}.slot-label{font-size:.78rem;color:#8090aa;text-align:center;margin-top:4px}
+.entry-note{text-align:center;color:#72809a;min-height:24px;font-size:.9rem}.hint{background:#fff4c9;border-radius:14px;padding:12px;text-align:center;font-weight:750;color:#70571a;margin:10px 0;min-height:48px}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;max-width:440px;margin:14px auto 0}.key{background:#f1f5ff;border-radius:16px;min-height:58px;font-size:1.7rem;font-weight:850;color:#344d80;box-shadow:0 3px 0 #dce5f8}.key:active{transform:translateY(2px);box-shadow:0 1px 0 #dce5f8}.key.action{font-size:1.05rem;background:#e7f7ef;color:#247b58}.key.home-key{font-size:.88rem;line-height:1.2;background:#ffdf83;color:#70420b;box-shadow:0 3px 0 #d5a33b;padding:4px}.timer-pill{background:#ffdf4f!important;color:#9c2d20!important;border:3px solid #ff8b32;box-shadow:0 0 0 3px #fff4b8,0 4px 0 #d76c28;font-size:1.1rem;font-weight:1000}.timer-pill #timer{font-size:1.35em;color:#bd211c}.key.clear{background:#ffe9e9;color:#a84d4d}.countdown{position:fixed;inset:0;background:#24324a;color:white;display:grid;place-items:center;text-align:center;white-space:nowrap;word-break:keep-all;z-index:5;font-size:clamp(3.5rem,15vw,8rem);font-weight:1000}.result{text-align:center}.result-emoji{font-size:4rem}.score{font-size:clamp(2.5rem,9vw,4.5rem);font-weight:1000;color:#355fc5;margin:8px}.result-stats{display:flex;gap:12px;justify-content:center;margin:20px 0}.stat{background:#f1f5ff;padding:16px;border-radius:18px;flex:1;max-width:200px}.stat strong{display:block;font-size:1.7rem}.review{text-align:left;margin-top:20px}.review-row{padding:10px;border-bottom:1px solid #edf0f7;display:flex;justify-content:space-between;gap:12px}.good{color:#16835c;font-weight:800}.bad{color:#c45151;font-weight:800}
+@media(min-width:650px){.level-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.game-layout{display:grid;grid-template-columns:1fr 260px;gap:24px;align-items:center}.keypad{grid-template-columns:repeat(3,1fr)}.key{min-height:64px}}
+@media(max-width:390px){.level{padding:12px 9px}.level strong{font-size:.94rem}.level small{font-size:.82rem;margin-left:0}.slot{width:66px;height:72px}.key{min-height:53px}}
+
+/* Cheerful illustrated start screen */
+body{background:linear-gradient(180deg,#43c7f5 0%,#b7f0ff 25%,#a7e86e 47%,#ddf6a8 100%)}
+.app{width:min(1100px,100%);height:100svh;min-height:0;margin:auto;padding:clamp(6px,1.4vh,14px) clamp(8px,2vw,22px);position:relative;overflow:auto;display:flex;flex-direction:column;justify-content:flex-start}
+header{position:relative;padding:clamp(3px,1vh,10px) 0 clamp(5px,1.3vh,14px);z-index:1;flex:0 0 auto}
+header:before{content:'🐰　🐻　🐱　🦊';display:block;font-size:clamp(1.8rem,5vh,3.5rem);line-height:1.1;margin-bottom:clamp(2px,.6vh,7px);opacity:1;z-index:-1}
+header h1{font-family:"Arial Rounded MT Bold","M PLUS Rounded 1c","Hiragino Maru Gothic ProN",system-ui,sans-serif;font-size:clamp(1.8rem,5.8vh,4rem);font-weight:1000;letter-spacing:.02em;line-height:1.12;color:#ff3f83;text-shadow:0 3px 0 #ffffff,0 5px 10px #d85b8b38;-webkit-text-stroke:0}
+header p{display:inline-block;margin:clamp(4px,1vh,10px) 0 0;background:#ffe54f;color:#144b78;font-weight:1000;font-size:clamp(1rem,3vw,1.65rem);padding:7px 18px;border:3px solid white;border-radius:12px;box-shadow:0 4px 0 #d7a82a;transform:rotate(-1deg)}
+#home.panel{background:transparent;box-shadow:none;padding:0;position:relative;flex:1 0 auto}
+#home h2{color:#fff;text-shadow:2px 3px #4c9a44;font-weight:1000;text-align:center;font-size:clamp(.95rem,2.5vh,1.35rem);margin:0 0 clamp(4px,1vh,10px)}
+.level-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(5px,1.2vw,10px)}
+.level{position:relative;text-align:center;min-height:clamp(88px,15vh,145px);padding:clamp(5px,1vh,10px) 5px clamp(5px,1vh,10px);border:4px solid white;border-radius:26px;background:#ff4f98;color:#fff;box-shadow:0 6px 0 #bd3f76,0 9px 12px #245a432c;overflow:hidden}
+.level:before,.level:after{content:none!important;display:none!important}
+.level[data-level="2"]{background:#ff8b25;box-shadow:0 6px 0 #c86718,0 9px 12px #245a432c}.level[data-level="3"]{background:#ffd51f;color:#fff;box-shadow:0 6px 0 #c6a41c,0 9px 12px #245a432c}.level[data-level="4"]{background:#7bd33d;box-shadow:0 6px 0 #4a9d28,0 9px 12px #245a432c}.level[data-level="5"]{background:#20a8f3;box-shadow:0 6px 0 #1777b6,0 9px 12px #245a432c}.level[data-level="6"]{background:#9b65ef;box-shadow:0 6px 0 #7040ba,0 9px 12px #245a432c}
+.level .num{display:none}.level strong{display:block;font-size:clamp(1.45rem,4.4vw,2.15rem);font-weight:1000;text-shadow:1px 3px #0002;line-height:1.35;margin:3px 0 8px}.level strong:before{content:'レベル';font-size:.8em}.level small{display:block;background:#fffdf5;color:#17466d;border-radius:15px;padding:8px 3px;margin:0;font-size:clamp(.75rem,2.2vw,1rem);font-weight:1000;line-height:1.45;min-height:48px}
+.level small:after{content:none!important;display:none!important}
+.level[style*="4px solid"]{outline:4px solid #fff26b;transform:translateY(-2px)}
+#start.primary{width:min(500px,94%);white-space:nowrap;word-break:keep-all;margin:clamp(7px,1.5vh,16px) auto 4px;border:5px solid white;border-radius:50px;padding:15px 12px;background:linear-gradient(#24b7ff,#0878e7);font-size:clamp(1.1rem,4.8vw,2.7rem);font-weight:1000;box-shadow:0 7px 0 #0755a8,0 10px 14px #275c3a4d;text-shadow:1px 2px #0002}
+#start.primary:before{content:'▶　';font-size:.85em}#start.primary:disabled{font-size:clamp(1.05rem,4.2vw,2.3rem)}#start.primary:disabled{background:linear-gradient(#87c9ee,#4d9fdc);opacity:.9}
+#home:after{content:'🐶　🐼　🐸　🐣';display:block;text-align:center;font-size:clamp(1.25rem,3.8vh,2.5rem);padding:clamp(2px,.5vh,6px) 0 0;filter:drop-shadow(0 2px 0 white)}
+@media(min-width:650px){.level-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.level{min-height:clamp(100px,16vh,150px)}.level strong{font-size:clamp(1.4rem,3vw,2rem)}}
+@media(max-width:520px){.app{padding:5px 8px}.level{min-height:clamp(82px,13vh,115px);border-radius:18px;border-width:3px}.level strong{font-size:clamp(1.2rem,4.8vw,1.65rem)}.level small{font-size:clamp(.62rem,2.2vw,.78rem);min-height:0;padding:5px 2px}header h1{font-size:clamp(1.65rem,7vw,2.5rem)}header p{font-size:clamp(.8rem,3.4vw,1.1rem);padding:5px 10px}}
+@media(max-height:700px){header:before{font-size:1.6rem}header h1{font-size:clamp(1.6rem,5vh,2.6rem)}header p{margin-top:4px;padding:4px 10px}#start.primary{padding:9px 14px;font-size:clamp(1.2rem,4vh,2rem)}#home:after{font-size:1.3rem}.level{min-height:clamp(70px,12vh,100px)}}
+
+/* Game screen fits the viewport; keep a reserved hint area so the keypad does not jump. */
+#game{height:100svh;min-height:0;overflow:hidden;display:flex;flex-direction:column;padding:clamp(7px,1.3vh,14px);border-radius:0;}
+#game.hidden{display:none!important}
+#game .topline{margin-bottom:5px;gap:5px;font-size:clamp(.75rem,2.2vw,1rem)}
+#game .pill{padding:5px 8px}
+#game .progress{margin:3px 0 8px;flex:0 0 7px}
+#game .game-layout{flex:1;min-height:0;gap:clamp(5px,1vh,12px);align-items:stretch;}
+#game .game-layout>div:first-child{display:flex;flex-direction:column;min-height:0}
+#game .question{padding:clamp(4px,1vh,10px) 0 4px;flex:0 0 auto}
+#game .equation{font-size:clamp(2.1rem,8vw,4.3rem);margin:5px 0 8px}
+#game .entry-note{min-height:20px;font-size:.82rem}
+#game .hint{flex:1 1 auto;min-height:clamp(125px,22vh,210px);max-height:32vh;overflow:auto;margin:5px 0 0;padding:7px;font-size:clamp(.78rem,2vw,.95rem)}
+#game .keypad{margin:0 auto;gap:clamp(4px,1vh,8px);width:100%;height:100%;grid-template-rows:repeat(4,minmax(0,1fr));}
+#game .key{min-height:0;height:100%;font-size:clamp(1.2rem,4vh,1.7rem);border-radius:12px;padding:2px}
+#game .key.home-key{font-size:clamp(.68rem,1.8vw,.88rem)}
+@media(min-width:650px){#game .game-layout{grid-template-columns:minmax(0,1fr) minmax(220px,260px)}#game .key{min-height:0}}
+@media(max-width:649px){#game .game-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(125px,38%)}#game .equation{gap:4px}#game .equation .slot{width:clamp(34px,9vw,54px);height:clamp(42px,9vh,58px)}#game .hint{min-height:clamp(125px,23vh,185px);max-height:34vh}}
+@media(max-height:560px){#game .hint{min-height:100px;max-height:25vh;font-size:.72rem}#game .question{padding-top:2px}#game .equation{font-size:clamp(1.8rem,6vh,2.8rem)}#game .key{font-size:1.15rem}}
+
+.home-confirm-overlay{position:fixed;inset:0;z-index:20;background:rgba(20,30,50,.62);display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box}
+.home-confirm-overlay.hidden{display:none!important}.home-confirm-box{width:min(100%,360px);background:#fff;border-radius:22px;padding:24px 20px;text-align:center;box-shadow:0 12px 36px #0004;color:#29364c}.home-confirm-box p{font-size:1.1rem;font-weight:800;line-height:1.6;margin:0 0 20px}.home-confirm-actions{display:flex;gap:12px;justify-content:center}.home-confirm-actions button{flex:1;min-height:52px;border:0;border-radius:14px;font-size:1.05rem;font-weight:900;touch-action:manipulation;cursor:pointer}.home-confirm-cancel{background:#edf1f8;color:#34415a}.home-confirm-yes{background:#ffdf83;color:#70420b}
+</style>
+</head>
+<body>
+<div class="app">
+<header><h1>たし算チャレンジ</h1><p>10もんに ちょうせんしよう！</p></header>
+<main id="home" class="panel">
+<h2>どのレベルに ちょうせんする？</h2>
+<div class="level-grid" id="levels">
+<button class="level" data-level="1"><span class="num">①</span><strong>1</strong><small>1けた ＋ 1けた<br>答えは 1けた</small></button>
+<button class="level" data-level="2"><span class="num">②</span><strong>2</strong><small>1けた ＋ 1けた<br>答えは 2けた</small></button>
+<button class="level" data-level="3"><span class="num">③</span><strong>3</strong><small>2けた ＋ 1けた<br>くり上がりなし</small></button>
+<button class="level" data-level="4"><span class="num">④</span><strong>4</strong><small>2けた ＋ 1けた<br>くり上がりあり</small></button>
+<button class="level" data-level="5"><span class="num">⑤</span><strong>5</strong><small>2けた ＋ 2けた<br>くり上がりなし</small></button>
+<button class="level" data-level="6"><span class="num">⑥</span><strong>6</strong><small>2けた ＋ 2けた<br>くり上がりあり</small></button>
+</div>
+<button id="start" class="primary" disabled>レベルを えらんでね！</button>
+</main>
+<section id="game" class="panel hidden">
+<div class="topline"><span class="pill" id="levelLabel">レベル①</span><span class="pill">もんだい <span id="qnum">1</span> / 10</span><span class="pill timer-pill">⏱ <span id="timer">0.0</span>秒</span></div>
+<div class="progress"><div id="bar" class="bar"></div></div>
+<div class="game-layout">
+<div>
+<div class="question"><div class="label">こたえを いれよう！</div><div id="equation" class="equation"><span class="eq-text">3 + 4 =</span><div id="slots" class="answer-slots in-equation"></div></div><div id="entryNote" class="entry-note">1のくらいから いれてね</div></div>
+<div id="hint" class="hint hidden" aria-live="polite"></div>
+</div>
+<div><div class="keypad" id="keypad">
+<button class="key" data-key="1">1</button><button class="key" data-key="2">2</button><button class="key" data-key="3">3</button>
+<button class="key" data-key="4">4</button><button class="key" data-key="5">5</button><button class="key" data-key="6">6</button>
+<button class="key" data-key="7">7</button><button class="key" data-key="8">8</button><button class="key" data-key="9">9</button>
+<button class="key home-key" data-key="home">トップにもどる</button><button class="key" data-key="0">0</button><button class="key action" data-key="back">もどる</button>
+</div></div></div>
+</section>
+<section id="result" class="panel result hidden"><div class="result-emoji" id="resultEmoji">🎉</div><h2>チャレンジ けっか</h2><p id="resultMessage">よくがんばったね！</p><div class="result-stats"><div class="stat">かかった時間<strong id="finalTime">0.0秒</strong></div><div class="stat">せいかい<strong id="accuracy">100%</strong></div></div><button id="retry" class="primary">もういちど チャレンジ！</button><button id="homeBtn" class="primary" style="background:#eaf0ff;color:#355fc5;box-shadow:0 5px 0 #d4def5">レベルを えらぶ</button><div class="review" id="review"></div></section>
+</div>
+<div id="countdown" class="countdown hidden">3</div>
+<div id="homeConfirm" class="home-confirm-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="homeConfirmText">
+ <div class="home-confirm-box"><p id="homeConfirmText">いまの もんだいを ちゅうしして、トップにもどりますか？</p><div class="home-confirm-actions"><button type="button" class="home-confirm-cancel" id="homeCancel">つづける</button><button type="button" class="home-confirm-yes" id="homeYes">トップにもどる</button></div></div>
+</div>
+<script>
+(()=> {
+const levels=[
+{label:'1 1けた＋1けた（1けた）',digits:1,kind:1},
+{label:'2 1けた＋1けた（2けた）',digits:2,kind:2},
+{label:'3 2けた＋1けた（くり上がりなし）',digits:2,kind:3},
+{label:'4 2けた＋1けた（くり上がりあり）',digits:2,kind:4},
+{label:'5 2けた＋2けた（くり上がりなし）',digits:2,kind:5},
+{label:'6 2けた＋2けた（くり上がりあり）',digits:2,kind:6}
+];
+const $=id=>document.getElementById(id);
+let selected=0, questions=[], index=0, entries=[], activeDigit=0, startAt=0, questionAt=0, timerId=null, hintId=null, nextHintId=null, answers=[], finished=false, hintShown=false;
+document.querySelectorAll('.level').forEach(b=>b.addEventListener('click',()=>{
+ selected=+b.dataset.level; document.querySelectorAll('.level').forEach(x=>x.style.borderColor=+x.dataset.level===selected?'#4f7df3':'transparent');
+ $('start').disabled=false;$('start').textContent='レベル'+selected+'で スタート！';
+}));
+function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a}
+function makeQuestion(k){
+ let a,b;
+ for(let tries=0;tries<1000;tries++){
+  if(k===1){a=rand(1,8);b=rand(1,9-a)}
+  if(k===2){a=rand(1,9);b=rand(10-a,9);if(a+b<10)continue}
+  if(k===3){a=rand(10,98);b=rand(1,9);if(a%10+b>=10||a+b>99)continue}
+  if(k===4){a=rand(10,98);b=rand(1,9);if(a%10+b<10||a+b>99)continue}
+  if(k===5){a=rand(10,89);b=rand(10,99-a);if(Math.floor(a/10)+Math.floor(b/10)>=10||(a%10)+(b%10)>=10||a+b>99)continue}
+  if(k===6){a=rand(10,89);b=rand(10,99-a);if((a%10)+(b%10)<10||a+b>99)continue}
+  if(a!=null&&b!=null&&a>0&&b>0)return {a,b,sum:a+b};
+ }
+ return {a:1,b:1,sum:2};
+}
+let soundContext=null;
+function playTone(frequency, duration=0.12, type='sine', volume=0.12, delay=0){
+ try{
+  const Ctx=window.AudioContext||window.webkitAudioContext;
+  if(!Ctx)return;
+  if(!soundContext)soundContext=new Ctx();
+  if(soundContext.state==='suspended')soundContext.resume();
+  const t=soundContext.currentTime+delay;
+  const osc=soundContext.createOscillator(),gain=soundContext.createGain();
+  osc.type=type;osc.frequency.setValueAtTime(frequency,t);
+  gain.gain.setValueAtTime(0.0001,t);gain.gain.exponentialRampToValueAtTime(volume,t+0.015);gain.gain.exponentialRampToValueAtTime(0.0001,t+duration);
+  osc.connect(gain);gain.connect(soundContext.destination);osc.start(t);osc.stop(t+duration+0.03);
+ }catch(e){}
+}
+function playCountdownSound(){
+ // はっきり聞こえる短い電子チャイム。基音に高音を重ねて輪郭を出す
+ playTone(880,0.24,'square',0.22);
+ playTone(1320,0.18,'sine',0.12,0.015);
+}
+function playStartSound(){playTone(523,0.20,'square',0.18);playTone(659,0.20,'square',0.19,0.16);playTone(784,0.30,'square',0.22,0.32);playTone(1046,0.34,'sine',0.15,0.34)}
+function playCorrectSound(){playTone(784,0.12,'sine',0.12);playTone(988,0.18,'sine',0.12,0.11)}
+function playWrongSound(){playTone(260,0.18,'triangle',0.13);playTone(196,0.24,'triangle',0.12,0.16)}
+function startGame(){
+ clearInterval(timerId);clearTimeout(hintId);clearTimeout(nextHintId);finished=false;answers=[];wrongAttempts=0;index=0;
+ questions=[];const seen=new Set();let attempts=0;
+ while(questions.length<10 && attempts<5000){attempts++;const q=makeQuestion(selected);const key=q.a+'+'+q.b;if(!seen.has(key)){seen.add(key);questions.push(q)}}
+ // Rare fallback: if a level's possible combinations are exhausted, allow reversed addends only when distinct.
+ while(questions.length<10){const q=makeQuestion(selected);const key=q.a+'+'+q.b;if(!seen.has(key)){seen.add(key);questions.push(q)}}$('home').classList.add('hidden');$('result').classList.add('hidden');$('game').classList.remove('hidden');
+ $('levelLabel').textContent='レベル'+selected;$('countdown').classList.remove('hidden');
+ let n=3;$('countdown').textContent=n;playCountdownSound();
+ const tick=()=>{n--;if(n>0){$('countdown').textContent=n;playCountdownSound();setTimeout(tick,700)}else{$('countdown').textContent='スタート！';playStartSound();setTimeout(()=>{$('countdown').classList.add('hidden');startAt=performance.now();timerId=setInterval(updateTimer,100);showQuestion()},500)}};
+ setTimeout(tick,700);
+}
+function updateTimer(){if(!finished)$('timer').textContent=((performance.now()-startAt)/1000).toFixed(1)}
+function showQuestion(){
+ if(index>=10){endGame();return}
+ const q=questions[index];entries=Array(levels[selected-1].digits).fill(null);activeDigit=0;questionAt=performance.now();
+ $('qnum').textContent=index+1;$('bar').style.width=(index*10)+'%';$('equation').querySelector('.eq-text').textContent=q.a+' + '+q.b+' =';$('hint').classList.remove('hidden');$('hint').innerHTML='';hintShown=false;
+ renderSlots();$('entryNote').textContent=entries.length===1?'こたえを いれてね':'1のくらいから いれてね';
+ clearTimeout(hintId);clearTimeout(nextHintId);hintId=setTimeout(()=>showHint(activeDigit),5000);
+}
+function renderSlots(){
+ $('slots').innerHTML='';
+ // Internal entry order is ones then tens, but visual order is tens then ones.
+ const order=entries.length===1?[0]:[1,0];
+ const labels=entries.length===1?['こたえ']:['10の位','1の位'];
+ order.forEach(i=>{
+  let wrap=document.createElement('div');wrap.className='slot-wrap';
+  let slot=document.createElement('div');slot.className='slot'+(i===activeDigit?' active':'');slot.textContent=entries[i]===null?'':entries[i];slot.setAttribute('role','button');slot.setAttribute('tabindex','0');slot.setAttribute('aria-label',labels[entries.length===1?0:i===1?0:1]+'を選択');slot.addEventListener('click',()=>{activeDigit=i;renderSlots()});slot.addEventListener('keydown',ev=>{if(ev.key==='Enter'||ev.key===' '){ev.preventDefault();activeDigit=i;renderSlots()}});wrap.append(slot);
+  let lab=document.createElement('div');lab.className='slot-label';lab.textContent=labels[entries.length===1?0:i===1?0:1];wrap.append(lab);
+  $('slots').append(wrap);
+ });
+}
+function dotGroup(n, color, label){
+ const dots=Array.from({length:n},()=>`<span style="display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:${color};color:#fff;font-size:12px;font-weight:900;box-shadow:inset 0 -2px 0 #0001">●</span>`).join('');
+ return `<div style="display:inline-flex;flex-direction:column;align-items:center;gap:5px;min-width:70px"><div style="display:grid;grid-template-columns:repeat(5,22px);gap:4px;justify-content:center">${dots}</div><strong style="font-size:1.05rem">${label}</strong></div>`;
+}
+function visualHint(q,k,digit){
+ const aTens=Math.floor(q.a/10), bTens=Math.floor(q.b/10), aOnes=q.a%10, bOnes=q.b%10;
+ const carry=(aOnes+bOnes)>=10?1:0;
+ const isSingleDigit=k<=2;
+ const showTens=(digit===1 && !isSingleDigit);
+ const aVal=showTens?aTens:aOnes, bVal=showTens?bTens:bOnes;
+ const aLabel=isSingleDigit?q.a:(showTens?aTens+'十':aOnes+'こ');
+ const bLabel=isSingleDigit?q.b:(showTens?bTens+'十':bOnes+'こ');
+ const dotMarks=(n,color)=>Array.from({length:Math.min(n,10)},()=>`<span style="display:inline-block;width:13px;height:13px;border-radius:50%;background:${color};margin:2px"></span>`).join('');
+ const tenMarks=(n,color)=>Array.from({length:Math.min(n,8)},()=>`<span style="display:inline-grid;place-items:center;width:15px;height:15px;border-radius:3px;background:${color};margin:2px;color:white;font-size:10px">■</span>`).join('');
+ const operand=(label,n,color,tens)=>`<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:5px;min-width:82px;min-height:68px;padding:8px;background:${color};border:2px solid ${tens?'#9aaddd':'#f0d29b'};border-radius:12px;box-sizing:border-box"><strong style="font-size:1.05rem;text-align:center">${label}</strong><div style="display:flex;align-items:center;justify-content:center;flex-wrap:wrap;max-width:130px;min-height:18px">${tens?tenMarks(n,color==='#e8efff'?'#4f7df3':'#f2a93b'):dotMarks(n,color==='#e8efff'?'#4f7df3':'#f2a93b')||'—'}</div></div>`;
+ const title=isSingleDigit?'💡 まるを かぞえてみよう！':(showTens?'💡 10のくらいの ヒント':'💡 1のくらいの ヒント');
+ let carryBlock='';
+ if(showTens&&carry){carryBlock=`<b style="font-size:1.2rem">＋</b><div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-width:82px;min-height:68px;padding:8px;background:#e5f7df;border:2px solid #9acb91;border-radius:12px;box-sizing:border-box"><strong>くり上がり</strong><div style="font-size:1.05rem">＋1十</div></div>`;}
+ const explain=isSingleDigit?'まるを ひとつずつ かぞえてみよう。':(showTens?`10のくらいは ${aTens}＋${bTens}${carry?'＋1（くり上がり）':''} だよ。${carry?'1のくらいから 1十 くり上がるよ。':'10のくらいどうしを たしてみよう。'}`:`1のくらいは ${aOnes}＋${bOnes}。${carry?'10こで 1十 くり上がるよ。':'1のくらいどうしを たしてみよう。'}`);
+ return `<div style="font-weight:900;text-align:center;margin-bottom:8px;color:#315bc1">${title}</div><div style="display:flex;justify-content:center;align-items:center;gap:8px;flex-wrap:wrap;text-align:center">${operand(aLabel,aVal,'#e8efff',showTens)}<b style="font-size:1.25rem;text-align:center">＋</b>${operand(bLabel,bVal,'#fff1d9',showTens)}${carryBlock}</div><div style="margin-top:8px;font-weight:750;text-align:center">${explain}</div>`;
+}
+function showHint(digit=activeDigit, immediate=false){
+ if(finished||index>=10)return;
+ hintShown=true;
+ const q=questions[index],k=levels[selected-1].kind;
+ $('hint').innerHTML=visualHint(q,k,digit);
+ $('hint').classList.remove('hidden');
+}
+function press(key){
+ if(finished)return;
+ if(key==='home'){ $('homeConfirm').classList.remove('hidden'); return }
+ if($('countdown').classList.contains('hidden')===false)return;
+ if(key==='clear'){entries[activeDigit]=null;renderSlots();return}
+ if(key==='back'){
+  if(entries.length===1){entries[0]=null;activeDigit=0;}
+  else {
+   if(entries[activeDigit]!==null){entries[activeDigit]=null;}
+   else {const prev=activeDigit===1?0:1;entries[prev]=null;activeDigit=prev;}
+  }
+  renderSlots();return;
+ }
+ if(key==='ok'){submitAnswer();return}
+ const digit=Number(key);if(!Number.isInteger(digit))return;
+ const enteredAt=activeDigit; if(entries[activeDigit]===null){entries[activeDigit]=digit;if(activeDigit<entries.length-1)activeDigit++;else if(entries.length===2 && activeDigit===1)activeDigit=0;}
+ else {entries[activeDigit]=digit;if(entries.length===2 && activeDigit===1)activeDigit=0;}
+ renderSlots();
+ if(hintShown && entries.length===2 && entries.some(v=>v!==null)){clearTimeout(nextHintId);const other=enteredAt===0?1:0;if(entries[other]===null)nextHintId=setTimeout(()=>showHint(other),3000); }
+ if(entries.every(v=>v!==null)){setTimeout(submitAnswer,180)}
+}
+function submitAnswer(){
+ if(finished||entries.some(v=>v===null))return;
+ const q=questions[index],value=entries.length===1?entries[0]:(entries[1]*10+entries[0]);
+ if(value!==q.sum){
+  playWrongSound();
+  wrongAttempts++;
+  clearTimeout(hintId);clearTimeout(nextHintId);hintShown=true;
+  $('hint').innerHTML='🌱 おしい！ もういちど かんがえてみよう。<br><span style="font-size:.88rem;font-weight:600">つぎの もんだいには すすまないよ。</span><div style="margin-top:8px">'+visualHint(q,levels[selected-1].kind,0)+'</div>';
+  $('hint').classList.remove('hidden');
+  entries=Array(levels[selected-1].digits).fill(null);activeDigit=0;renderSlots();
+  $('entryNote').textContent='もういちど こたえを いれてね';
+  hintId=null;
+  return;
+ }
+ clearTimeout(hintId);clearTimeout(nextHintId);
+ playCorrectSound();
+ answers.push({q,value,correct:true,elapsed:(performance.now()-questionAt)/1000});
+ index++;if(index>=10){endGame();return}
+ showQuestion();
+}
+function endGame(){
+ finished=true;clearInterval(timerId);clearTimeout(hintId);clearTimeout(nextHintId);$('bar').style.width='100%';$('game').classList.add('hidden');$('result').classList.remove('hidden');
+ const score=answers.filter(a=>a.correct).length,time=((performance.now()-startAt)/1000).toFixed(1);
+ $('finalTime').textContent=time+'秒';$('accuracy').textContent=Math.round(score/(10+wrongAttempts)*100)+'%';
+ $('resultEmoji').textContent=score>=7?'🎉':'🌱';$('resultMessage').textContent=score>=7?'よくがんばったね！':'チャレンジできたね！つぎもやってみよう！';
+ $('review').innerHTML='<h3>こたえを ふりかえろう</h3>'+answers.map((a,i)=>`<div class="review-row"><span>${i+1}. ${a.q.a} + ${a.q.b} = ${a.q.sum}</span><span class="${a.correct?'good':'bad'}">${a.correct?'○':'あなた：'+a.value}</span></div>`).join('');
+}
+$('start').addEventListener('click',()=>{if(selected)startGame()});
+function closeHomeConfirm(){ $('homeConfirm').classList.add('hidden'); }
+function returnToHome(){ clearInterval(timerId);clearTimeout(hintId);clearTimeout(nextHintId);finished=true;$('countdown').classList.add('hidden');$('homeConfirm').classList.add('hidden');$('game').classList.add('hidden');$('result').classList.add('hidden');$('home').classList.remove('hidden');$('timer').textContent='0.0'; }
+$('homeCancel').addEventListener('click',closeHomeConfirm);
+$('homeYes').addEventListener('click',returnToHome);
+$('homeConfirm').addEventListener('click',e=>{if(e.target===$('homeConfirm'))closeHomeConfirm()});
+$('keypad').addEventListener('click',e=>{const b=e.target.closest('button[data-key]');if(b)press(b.dataset.key)});
+$('retry').addEventListener('click',startGame);
+$('homeBtn').addEventListener('click',()=>{$('result').classList.add('hidden');$('home').classList.remove('hidden')});
+document.addEventListener('keydown',e=>{if(/^[0-9]$/.test(e.key))press(e.key);else if(e.key==='Backspace')press('back')});
+})();
+</script>
+</body></html>
